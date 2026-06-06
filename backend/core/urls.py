@@ -1,0 +1,14 @@
+# core/urls.py
+from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/auth/', include('users.urls')),
+    path('api/', include('capsules.urls')),
+    path('api/', include('quizzes.urls')),
+    path('api/', include('bookmarks.urls')),
+    path('api/', include('progress.urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
