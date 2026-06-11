@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getArticles } from '../utils/api';
-import { FiSearch, FiClock, FiArrowRight, FiFilter } from 'react-icons/fi';
+import { FiSearch, FiClock, FiArrowRight } from 'react-icons/fi';
 
 const COLORS = {
   'General Knowledge': '#3B82F6',

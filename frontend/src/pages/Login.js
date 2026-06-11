@@ -15,10 +15,8 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); setLoading(true);
-    try {
+   try {
       const res  = await loginUser(form);
-      const prof = await getProfile();  // need to set token first temporarily
-      // set token in localStorage then fetch profile
       localStorage.setItem('access_token', res.data.access);
       const profile = await getProfile();
       login(res.data, profile.data);

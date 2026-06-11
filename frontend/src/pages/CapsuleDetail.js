@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getArticles, getQuizzes, getCategories } from '../utils/api';
-import { FiSearch, FiClock, FiArrowRight, FiBookOpen } from 'react-icons/fi';
+import { FiSearch, FiClock, FiArrowRight } from 'react-icons/fi';
 
 const CapsuleDetail = () => {
   const { id } = useParams();
