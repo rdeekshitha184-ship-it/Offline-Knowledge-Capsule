@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getQuiz, submitQuizScore } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { FiClock, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import { getQuizById } from '../utils/offlineDB';
 
 const QuizPage = () => {
   const { id } = useParams();
@@ -17,9 +18,21 @@ const QuizPage = () => {
   const [finished, setFinished] = useState(false);
   const [loading,  setLoading]  = useState(true);
 
-  useEffect(() => {
-    getQuiz(id).then(res => setQuiz(res.data)).finally(() => setLoading(false));
-  }, [id]);
+useEffect(() => {
+  const loadQuiz = async () => {
+    try {
+      const res = await getQuiz(id);
+      setQuiz(res.data);
+    } catch {
+      // Offline fallback
+      const offlineQuiz = await getQuizById(id);
+      setQuiz(offlineQuiz);
+    } finally {
+      setLoading(false);
+    }
+  };
+  loadQuiz();
+}, [id]);
 
   const handleNext = useCallback(() => {
     if (!quiz) return;

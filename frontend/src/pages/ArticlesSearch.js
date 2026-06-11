@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getArticles } from '../utils/api';
 import { FiSearch, FiClock, FiArrowRight } from 'react-icons/fi';
+import { searchArticles as searchOffline } from '../utils/offlineDB';
 
 const COLORS = {
   'General Knowledge': '#3B82F6',
@@ -22,13 +23,23 @@ const ArticlesSearch = () => {
   const [loading,  setLoading]  = useState(false);
 
   // Fetch whenever search term changes
-  useEffect(() => {
-    if (!search.trim()) { setArticles([]); return; }
-    setLoading(true);
-    getArticles({ search })
-      .then(res => setArticles(res.data))
-      .finally(() => setLoading(false));
-  }, [search]);
+useEffect(() => {
+  if (!search.trim()) { setArticles([]); return; }
+  setLoading(true);
+  const loadData = async () => {
+    try {
+      const res = await getArticles({ search });
+      setArticles(res.data);
+    } catch {
+      // Offline search
+      const results = await searchOffline(search);
+      setArticles(results);
+    } finally {
+      setLoading(false);
+    }
+  };
+  loadData();
+}, [search]);
 
   const handleSearch = (e) => {
     e.preventDefault();

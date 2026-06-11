@@ -6,6 +6,7 @@ import {
   FiBriefcase, FiStar, FiHeart, FiZap, FiBookOpen, FiAward,
   FiClock, FiArrowRight, FiSearch
 } from 'react-icons/fi';
+import { hasOfflineData, getCategories as getOfflineCategories, getAllArticles } from '../utils/offlineDB';
 
 // Map icon names from DB to react-icons
 const ICONS = {
@@ -27,14 +28,28 @@ const Home = () => {
   const [quote]                         = useState(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    Promise.all([getCategories(), getArticles({ featured: true })])
-      .then(([catRes, artRes]) => {
-        setCategories(catRes.data);
-        setFeatured(artRes.data.slice(0, 3));
-      })
-      .finally(() => setLoading(false));
-  }, []);
+useEffect(() => {
+  const loadData = async () => {
+    try {
+      // Try online first
+      const [catRes, artRes] = await Promise.all([
+        getCategories(),
+        getArticles({ featured: true })
+      ]);
+      setCategories(catRes.data);
+      setFeatured(artRes.data.slice(0, 3));
+    } catch {
+      // Fallback to offline
+      const offlineCats = await getOfflineCategories();
+      const offlineArts = await getAllArticles();
+      setCategories(offlineCats);
+      setFeatured(offlineArts.filter(a => a.is_featured).slice(0, 3));
+    } finally {
+      setLoading(false);
+    }
+  };
+  loadData();
+}, []);
 
   const handleSearch = (e) => {
     e.preventDefault();

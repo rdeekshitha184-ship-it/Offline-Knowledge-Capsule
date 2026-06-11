@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getArticle, getRelatedArticles, toggleBookmark, markArticleRead } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { FiBookmark, FiClock, FiArrowLeft, FiArrowRight } from 'react-icons/fi';
+import { getArticleById, getAllArticles } from '../utils/offlineDB';
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -15,17 +16,33 @@ const ArticlePage = () => {
   const [loading,   setLoading]   = useState(true);
   const [msg,       setMsg]       = useState('');
 
-  useEffect(() => {
-    setLoading(true);
-    Promise.all([getArticle(id), getRelatedArticles(id)])
-      .then(([artRes, relRes]) => {
-        setArticle(artRes.data);
-        setRelated(relRes.data);
-        // mark as read if logged in
-        if (user) markArticleRead(id).catch(() => {});
-      })
-      .finally(() => setLoading(false));
-  }, [id, user]);
+ useEffect(() => {
+  setLoading(true);
+  const loadData = async () => {
+    try {
+      const [artRes, relRes] = await Promise.all([
+        getArticle(id),
+        getRelatedArticles(id)
+      ]);
+      setArticle(artRes.data);
+      setRelated(relRes.data);
+      if (user) markArticleRead(id).catch(() => {});
+    } catch {
+      // Offline fallback
+      const offlineArt = await getArticleById(id);
+      const allArts    = await getAllArticles();
+      setArticle(offlineArt);
+      setRelated(
+        allArts
+          .filter(a => a.category === offlineArt?.category && a.id !== parseInt(id))
+          .slice(0, 4)
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+  loadData();
+}, [id, user]);
 
   const handleBookmark = async () => {
     if (!user) { navigate('/login'); return; }

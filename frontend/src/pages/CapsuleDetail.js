@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getArticles, getQuizzes, getCategories } from '../utils/api';
 import { FiSearch, FiClock, FiArrowRight } from 'react-icons/fi';
+import { getArticlesByCategory, getQuizzesByCategory } from '../utils/offlineDB';
+import { getCategories as getOfflineCategories } from '../utils/offlineDB';
 
 const CapsuleDetail = () => {
   const { id } = useParams();
@@ -13,17 +15,34 @@ const CapsuleDetail = () => {
   const [search,    setSearch]    = useState('');
   const [loading,   setLoading]   = useState(true);
 
+
   useEffect(() => {
-    Promise.all([
-      getArticles({ category: id }),
-      getQuizzes({ category: id }),
-      getCategories(),
-    ]).then(([artRes, quizRes, catRes]) => {
+  const loadData = async () => {
+    try {
+      const [artRes, quizRes, catRes] = await Promise.all([
+        getArticles({ category: id }),
+        getQuizzes({ category: id }),
+        getCategories(),
+      ]);
       setArticles(artRes.data);
       setQuizzes(quizRes.data);
       setCategory(catRes.data.find(c => c.id === parseInt(id)));
-    }).finally(() => setLoading(false));
-  }, [id]);
+    } catch {
+      // Offline fallback
+      const [offlineArts, offlineQuizzes, offlineCats] = await Promise.all([
+        getArticlesByCategory(id),
+        getQuizzesByCategory(id),
+        getOfflineCategories(),
+      ]);
+      setArticles(offlineArts);
+      setQuizzes(offlineQuizzes);
+      setCategory(offlineCats.find(c => c.id === parseInt(id)));
+    } finally {
+      setLoading(false);
+    }
+  };
+  loadData();
+}, [id]);
 
   const filtered = articles.filter(a =>
     a.title.toLowerCase().includes(search.toLowerCase()) ||
