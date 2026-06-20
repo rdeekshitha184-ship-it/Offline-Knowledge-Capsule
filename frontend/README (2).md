@@ -10,6 +10,18 @@ A full-stack Progressive Web App (PWA) that delivers structured educational cont
 
 ---
 
+## 📸 Screenshots
+
+| Home Page | Capsule View | Quiz Page |
+|-----------|-------------|-----------|
+| 6 learning capsules with search | Articles with tags & filters | Timer-based MCQ with scoring |
+
+| Article Reader | Dashboard | Offline Mode |
+|---------------|-----------|--------------|
+| Bookmarks & related articles | Progress stats & quiz history | IndexedDB sync banner |
+
+---
+
 ## ✨ Features
 
 - 📖 **90 Articles** across 6 learning capsules
